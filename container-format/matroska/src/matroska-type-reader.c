@@ -515,7 +515,7 @@ type_reader_peek_string_utf##bits (TypeReader * reader, type ** str) \
  *
  * Returns: %TRUE if a string could be skipped, %FALSE otherwise.
  */
-
+ 
 /**
  * type_reader_peek_string:
  * @reader: a #TypeReader instance
