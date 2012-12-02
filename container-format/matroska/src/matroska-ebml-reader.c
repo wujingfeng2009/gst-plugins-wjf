@@ -61,8 +61,8 @@
 }
 
 
-gboolean _matroska_ebml_reader_get_element_id_and_size_unchecked (const guint8 *data,
-		guint32 *id, guint64 *size, guint32 *read_bytes,  guint32 remained_bytes)
+gboolean _matroska_ebml_reader_peek_element_id_and_size_unchecked (const guint8 *data,
+	guint32 remained_bytes, guint32 *id, guint64 *size, guint32 *read_bytes)
 {
 	guint8 *ebml_offset = data;
 	guint32 ebml_id = (guint32) GST_EBML_SIZE_UNKNOWN;
@@ -107,9 +107,16 @@ gboolean _matroska_ebml_reader_get_element_id_and_size_unchecked (const guint8 *
 	*read_bytes = ebml_read_bytes;
 	return TRUE;
 }
-
-gboolean matroska_ebml_reader_get_element_id_and_size (const guint8 *data,
-	guint32 *id, guint64 *size, guint32 *read_bytes,  guint32 remained_bytes)
+/*
+ * peek element id and size at given address.
+ * data: 			[in]	given mem address.
+ * remained_bytes:	[in]	remained_bytes in mem start from data.
+ * id:   			[out]	element id to peek.
+ * size: 			[out]	element data size to peek.
+ * read_bytes:		[out]	total bytes of id plus size.
+*/
+gboolean matroska_ebml_reader_peek_element_id_and_size (const guint8 *data,
+	guint32 remained_bytes, guint32 *id, guint64 *size, guint32 *read_bytes)
 {
 	g_return_val_if_fail (data != NULL, FALSE);
 	g_return_val_if_fail (id != NULL, FALSE);
@@ -117,8 +124,27 @@ gboolean matroska_ebml_reader_get_element_id_and_size (const guint8 *data,
 	g_return_val_if_fail (read_bytes != NULL, FALSE);
 	g_return_val_if_fail (remained_bytes > 0, FALSE);
 
-	return _matroska_ebml_reader_get_element_id_and_size_unchecked (data, id, size, read_bytes, remained_bytes);	
+	return _matroska_ebml_reader_peek_element_id_and_size_unchecked (data, remained_bytes, id, size, read_bytes);	
 }
+
+
+gboolean matroska_ebml_reader_skip_element_id_and_size (const guint8 *data,
+	guint32 remained_bytes)
+{
+	guint32 id;
+	guint64 size;
+	guint32 read_bytes;
+	g_return_val_if_fail (data != NULL, FALSE);
+	g_return_val_if_fail (remained_bytes > 0, FALSE);
+	
+	if( !_matroska_ebml_reader_peek_element_id_and_size_unchecked (data,
+		remained_bytes, &id, &size, &read_bytes) )
+	{
+		g_error("error: Peek element id and size failed!\n",);
+		return FALSE;
+	}
+}
+
 
 
 
