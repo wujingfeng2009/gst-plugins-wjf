@@ -12,33 +12,64 @@
 #include "matroska-ids.h"
 
 
-/* custom flow return code */
-#define  GST_FLOW_PARSE  GST_FLOW_CUSTOM_ERROR
+#define UINT64_VAL_UNKNOWN	G_MAXUINT64
+#define UINT32_VAL_UNKNOWN	G_MAXUINT32
 
-typedef struct _GstEbmlMaster {
-  guint64       offset;
-  GstByteReader br;
-} GstEbmlMaster;
+typedef struct GNode GNode;
 
-/* MatroskaEbmlReader:
- * MatroskaEbmlReader is responsible for cache part of file data
- * and read ebml elements.
- * ringbuffer_cache: 		the ringbuffer cache.
- * ringbuffer_size:			the mem size of the ringbuffer cache.
- * read_ptr:   				the read pointer in ringbuffer cache.
- * write_ptr:   			the write pointer in ringbuffer cache.
- * file_pos:   				crrent read position in media file.
-*/
+typedef struct _EbmlMaster {
+	guint32 id;
+	guint32 id_bytes;
+	guint64 size;
+	guint32 size_bytes;
+	guint8 *data;
+	guint64 file_pos;
+}EbmlMaster;
+
+typedef struct _FileCache {
+  TypeReader reader;
+  guint64 cache_file_offset;
+  gchar *file_path;
+} FileCache;
 
 typedef struct _MatroskaEbmlReader {
-  Guint8 *ringbuffer_cache;
-  guint64 ringbuffer_size;
-  Guint8 *read_ptr;
-  Guint8 *write_ptr;
-  guint64 file_pos;
-
-  GArray *readers;
+  FileCache *cache;
+  GNode *master_tree;
 } MatroskaEbmlReader;
+
+typedef enum {
+  FILE_CACHE_SEEK_SET,
+  FILE_CACHE_SEEK_CUR,
+  FILE_CACHE_SEEK_END,
+} File_cache_seek_t;
+
+
+
+FileCache *File_cache_new(guint32 cache_size);
+FileCache *File_cache_new_with_file(guint32 cache_size, gchar *file_path);
+void File_cache_free(FileCache *cache);
+
+gboolean File_cache_seek(FileCache *cache, guint64 file_offset, File_cache_seek_t seek_type);
+guint64 File_cache_tell(FileCache *cache);
+
+guint64 File_cache_get_file_length(FileCache *cache);
+guint32 File_cache_get_cache_size(FileCache *cache);
+
+gboolean File_cache_reset_cache_size(FileCache *cache, guint32 cache_size);
+gboolean File_cache_set_file(FileCache *cache, gchar *file_path);
+
+#define FILE_CACHE_CAST_READER(cache_ptr)	\
+	(((cache_ptr) == NULL) ? (NULL) : (TypeReader *)(cache_ptr))
+#define READER_CAST_FILE_CACHE(reader_ptr)	\
+	((reader_ptr) == NULL) ? (NULL) : (FileCache *)(reader_ptr))
+
+
+
+
+
+
+
+
 
 typedef GstFlowReturn (*GstPeekData) (gpointer * context, guint peek, const guint8 ** data);
 

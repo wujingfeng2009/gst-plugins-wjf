@@ -131,6 +131,7 @@ gboolean matroska_ebml_reader_peek_element_id_and_size (const guint8 *data,
 gboolean matroska_ebml_reader_skip_element_id_and_size (const guint8 *data,
 	guint32 remained_bytes)
 {
+	ENTER_FUNC
 	guint32 id;
 	guint64 size;
 	guint32 read_bytes;
@@ -145,6 +146,30 @@ gboolean matroska_ebml_reader_skip_element_id_and_size (const guint8 *data,
 	}
 }
 
+
+FileCache *File_cache_new(guint32 cache_size)
+{
+	ENTER_FUNC
+	FileCache *cache = g_slice_new0(FileCache);
+	type_reader_init(FILE_CACHE_CAST_READER(cache), 
+		(guint8 *)g_malloc0(cache_size), cache_size);
+	cache->cache_file_offset = 0;
+	cache->file_path = NULL;
+	LEAVE_FUNC
+	return cache;
+}
+
+FileCache *File_cache_new_with_file(guint32 cache_size, gchar *file_path)
+{
+	ENTER_FUNC
+	FileCache *cache = g_slice_new0(FileCache);
+	type_reader_init(FILE_CACHE_CAST_READER(cache), 
+		(guint8 *)g_malloc0(cache_size), cache_size);
+	cache->cache_file_offset = 0;
+	cache->file_path = g_strdup(file_path);
+	LEAVE_FUNC
+	return cache;
+}
 
 
 
