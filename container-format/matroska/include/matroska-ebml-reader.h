@@ -20,14 +20,25 @@ typedef struct _GstEbmlMaster {
   GstByteReader br;
 } GstEbmlMaster;
 
-typedef struct _GstEbmlRead {
-  GstElement *el;
+/* MatroskaEbmlReader:
+ * MatroskaEbmlReader is responsible for cache part of file data
+ * and read ebml elements.
+ * ringbuffer_cache: 		the ringbuffer cache.
+ * ringbuffer_size:			the mem size of the ringbuffer cache.
+ * read_ptr:   				the read pointer in ringbuffer cache.
+ * write_ptr:   			the write pointer in ringbuffer cache.
+ * file_pos:   				crrent read position in media file.
+*/
 
-  GstBuffer *buf;
-  guint64 offset;
+typedef struct _MatroskaEbmlReader {
+  Guint8 *ringbuffer_cache;
+  guint64 ringbuffer_size;
+  Guint8 *read_ptr;
+  Guint8 *write_ptr;
+  guint64 file_pos;
 
   GArray *readers;
-} GstEbmlRead;
+} MatroskaEbmlReader;
 
 typedef GstFlowReturn (*GstPeekData) (gpointer * context, guint peek, const guint8 ** data);
 
